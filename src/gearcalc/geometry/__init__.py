@@ -10,6 +10,7 @@ from gearcalc.geometry.measurement import (
     span_teeth,
     tooth_measurement,
 )
+from gearcalc.geometry.outline import GearOutline, OutlineSegment, gear_outline
 from gearcalc.geometry.pair import (
     balanced_sliding_x1,
     pair_for_center_distance,
@@ -28,12 +29,15 @@ from gearcalc.geometry.worm import (
 
 __all__ = [
     "FlankForm",
+    "GearOutline",
+    "OutlineSegment",
     "WormGearSet",
     "WormGeometry",
     "backlash",
     "balanced_sliding_x1",
     "form_diameter_hob",
     "gear_geometry",
+    "gear_outline",
     "gear_profile",
     "ideal_ball_diameter",
     "inv",
