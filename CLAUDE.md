@@ -46,4 +46,8 @@ storia git, commit 538f5fc).
    Mancano: VDI 2736-3, ruota in bronzo ISO/TS 14521, profilo vite per CATIA.
 3. adapter ISO 6336 → python-gearbox
 5. ISO 1328-1:2013, report
-6. tool MCP in CATIA_V5_MCP
+6. ◐ tool MCP in CATIA_V5_MCP (branch claude/dazzling-faraday-r6nr9o, dipendenza bloccata su
+   commit di gear): gear_pair_calc, gear_measurement, gear_backlash, gear_plastic_rating,
+   worm_gear_calc, worm_gear_plastic_rating, gear_profile_points, catia_create_spur_gear
+   (schizzo da gear_outline + Pad, controllo volume). Da fare: prova live su R34, elicoidali,
+   vite e ruota a vite in CATIA. Aggiornando gearcalc, aggiornare lo SHA in CATIA_V5_MCP.
