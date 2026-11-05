@@ -47,16 +47,24 @@ print(tm.k, tm.W_k_max, tm.W_k_min, tm.D_M, tm.M_d_max, tm.M_d_min)
 ## Verifica ruote in plastica (VDI 2736)
 
 ```python
-from gearcalc.rating import (Lubrication, Material, OperatingConditions, Polymer,
-                             VDI2736Input, rate_vdi2736)
+from gearcalc.rating import (
+    Lubrication,
+    Material,
+    OperatingConditions,
+    Polymer,
+    VDI2736Input,
+    rate_vdi2736,
+)
 
-res = rate_vdi2736(VDI2736Input(
-    pair=pair,
-    material1=Material(polymer=Polymer.STEEL),
-    material2=Material(polymer=Polymer.POM),
-    lubrication=Lubrication.GREASE,          # es. Klüber Isoflex Topas L32 → μ = 0.09
-    operating=OperatingConditions(T_1=0.15, n_1=3000, life_hours=500, theta_0=60),
-))
+res = rate_vdi2736(
+    VDI2736Input(
+        pair=pair,
+        material1=Material(polymer=Polymer.STEEL),
+        material2=Material(polymer=Polymer.POM),
+        lubrication=Lubrication.GREASE,  # es. Klüber Isoflex Topas L32 → μ = 0.09
+        operating=OperatingConditions(T_1=0.15, n_1=3000, life_hours=500, theta_0=60),
+    )
+)
 print(res.gear2.theta_flank, res.gear2.S_F, res.warnings)
 ```
 

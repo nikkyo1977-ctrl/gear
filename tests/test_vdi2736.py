@@ -177,9 +177,10 @@ def test_rating_hand_check() -> None:
     assert g1.theta_root == pytest.approx(theta)
     sigma_F = g1.Y_Fa * g1.Y_Sa * r.Y_eps * r.Y_beta * r.F_t / (6.0 * 0.8)
     assert g1.sigma_F == pytest.approx(sigma_F)
-    assert pytest.approx(
-        2.0 * root_strength(Material(polymer=Polymer.POM), theta, g1.N_L) / sigma_F
-    ) == g1.S_F  # type: ignore[operator]
+    assert (
+        pytest.approx(2.0 * root_strength(Material(polymer=Polymer.POM), theta, g1.N_L) / sigma_F)
+        == g1.S_F
+    )  # type: ignore[operator]
     assert pytest.approx(60 * 3000 * 500) == g1.N_L
     assert r.gear2 is not None and pytest.approx(g1.N_L * 12 / 45) == r.gear2.N_L
     assert g1.W_m is None  # a grasso niente usura

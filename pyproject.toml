@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "pytest-cov", "ruff>=0.6", "mypy>=1.10"]
+dev = ["pytest>=8", "pytest-cov", "ruff==0.17.4", "mypy>=1.10"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
