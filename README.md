@@ -9,7 +9,7 @@ partire dai punti di profilo prodotti da questa libreria.
 | Fase | Contenuto | Stato |
 |---|---|---|
 | 1 | Struttura del pacchetto, modello dati pydantic, geometria cilindrica esterna, test, CI | ✅ |
-| 2 | Geometria completa ISO 21771: dentatura interna, trocoide di piede, ripartizione x (DIN 3992), W_k / M_d, tolleranze di spessore (DIN 3967) | ⏳ |
+| 2 | Geometria ISO 21771 completa: dentature interne, profilo generato da creatore (trocoide, sottosquadro), d_Ff / d_Nf, strisciamenti specifici, ripartizione di x, W_k / M_d, gioco | ✅ |
 | 4 | Ruote in polimero VDI 2736; vite-ruota ISO/TS 14521 – DIN 3996 | ⏳ (prioritaria) |
 | 3 | Acciaio ISO 6336:2019 tramite [python-gearbox](https://github.com/efirvida/python-gearbox) | ⏳ |
 | 5 | Tolleranze ISO 1328-1:2013, report | ⏳ |
@@ -35,6 +35,11 @@ print(geo.a_w, geo.alpha_wt, geo.epsilon_alpha, geo.warnings)
 
 pts = gear_profile(geo.gear1, thickness_reduction=0.05)  # array (N, 2) in mm
 print(geo.model_dump_json(indent=2))  # output pronto per MCP
+
+# quote di controllo con scostamenti di spessore (mm)
+from gearcalc import ThicknessAllowances, tooth_measurement
+tm = tooth_measurement(geo.gear1, ThicknessAllowances(A_sne=-0.02, A_sni=-0.05))
+print(tm.k, tm.W_k_max, tm.W_k_min, tm.D_M, tm.M_d_max, tm.M_d_min)
 ```
 
 ## Convenzioni

@@ -28,8 +28,12 @@ storia git, commit 538f5fc).
 
 ## Roadmap
 1. ✅ struttura, modello dati, geometria cilindrica esterna, profilo 2D, CI
-2. geometria completa ISO 21771: interne, trocoide di piede, diametri di forma d_Ff/d_Nf,
-   ripartizione x (DIN 3992), W_k/M_d, tolleranze di spessore (DIN 3967)
+2. ✅ geometria ISO 21771: interne (convenzione con segno: z, d, a_w < 0), profilo esterno come
+   inviluppo esatto del creatore (trocoide + sottosquadro, verificato contro evolvente analitica e
+   d_Ff ISO), d_Nf, strisciamenti specifici, ripartizione x (uguale / strisciamenti bilanciati),
+   W_k, M_d (sfera ideale), gioco da scostamenti di spessore e interasse.
+   Aperti: tabelle DIN 3967 (scostamenti oggi in input), raccordo delle interne (coltello
+   stozzatore) e verifica completa di interferenza trocoidale nelle interne (ora regola z2−z1≥10).
 4. (anticipata) VDI 2736 polimeri; vite-ruota ISO/TS 14521
 3. adapter ISO 6336 → python-gearbox
 5. ISO 1328-1:2013, report
