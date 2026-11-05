@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gearcalc"
+version = "0.1.0"
+description = "Calcolo ingranaggi: geometria ISO 21771, verifica ISO 6336 (acciaio), VDI 2736 (polimeri), ISO/TS 14521 (vite-ruota)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = [
+    "numpy>=2.0",
+    "scipy>=1.13",
+    "pydantic>=2.7",
+    # Motore ISO 6336:2019 per l'acciaio (fase 3). Versione bloccata su commit.
+    "python-gearbox @ git+https://github.com/efirvida/python-gearbox@2417131f6aae12d2232148989fb8d5cd2539124b",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-cov", "ruff>=0.6", "mypy>=1.10"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gearcalc"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF"]
+# N802/N803/N806/N815: nomi con simboli ISO (d_a, alpha_wt, ...) volutamente non-PEP8
+ignore = ["N802", "N803", "N806", "N815", "RUF001", "RUF002", "RUF003"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["gearbox", "gearbox.*", "scipy", "scipy.*"]
+ignore_missing_imports = true
