@@ -10,7 +10,8 @@ partire dai punti di profilo prodotti da questa libreria.
 |---|---|---|
 | 1 | Struttura del pacchetto, modello dati pydantic, geometria cilindrica esterna, test, CI | ✅ |
 | 2 | Geometria ISO 21771 completa: dentature interne, profilo generato da creatore (trocoide, sottosquadro), d_Ff / d_Nf, strisciamenti specifici, ripartizione di x, W_k / M_d, gioco | ✅ |
-| 4 | Ruote in polimero VDI 2736; vite-ruota ISO/TS 14521 – DIN 3996 | ⏳ (prioritaria) |
+| 4a | Ruote in polimero VDI 2736-2: temperature, piede, fianco, usura a secco, deformazione | ✅ |
+| 4b | Vite-ruota ISO/TS 14521 – DIN 3996 | ⏳ (prioritaria) |
 | 3 | Acciaio ISO 6336:2019 tramite [python-gearbox](https://github.com/efirvida/python-gearbox) | ⏳ |
 | 5 | Tolleranze ISO 1328-1:2013, report | ⏳ |
 | 6 | Integrazione in `CATIA_V5_MCP` | ⏳ |
@@ -38,9 +39,30 @@ print(geo.model_dump_json(indent=2))  # output pronto per MCP
 
 # quote di controllo con scostamenti di spessore (mm)
 from gearcalc import ThicknessAllowances, tooth_measurement
+
 tm = tooth_measurement(geo.gear1, ThicknessAllowances(A_sne=-0.02, A_sni=-0.05))
 print(tm.k, tm.W_k_max, tm.W_k_min, tm.D_M, tm.M_d_max, tm.M_d_min)
 ```
+
+## Verifica ruote in plastica (VDI 2736)
+
+```python
+from gearcalc.rating import (Lubrication, Material, OperatingConditions, Polymer,
+                             VDI2736Input, rate_vdi2736)
+
+res = rate_vdi2736(VDI2736Input(
+    pair=pair,
+    material1=Material(polymer=Polymer.STEEL),
+    material2=Material(polymer=Polymer.POM),
+    lubrication=Lubrication.GREASE,          # es. Klüber Isoflex Topas L32 → μ = 0.09
+    operating=OperatingConditions(T_1=0.15, n_1=3000, life_hours=500, theta_0=60),
+))
+print(res.gear2.theta_flank, res.gear2.S_F, res.warnings)
+```
+
+Dati dei materiali: curve di resistenza, attrito, scambio termico e usura da VDI 2736-2;
+moduli elastici **indicativi** (sostituibili con `Material(E_23=..., dE_dT=...)`). Dove la norma
+non dà curve (PBT al piede, POM al fianco) si può fornire `sigma_FlimN` / `sigma_HlimN`.
 
 ## Convenzioni
 

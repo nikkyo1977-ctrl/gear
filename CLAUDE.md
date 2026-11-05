@@ -34,7 +34,12 @@ storia git, commit 538f5fc).
    W_k, M_d (sfera ideale), gioco da scostamenti di spessore e interasse.
    Aperti: tabelle DIN 3967 (scostamenti oggi in input), raccordo delle interne (coltello
    stozzatore) e verifica completa di interferenza trocoidale nelle interne (ora regola z2−z1≥10).
-4. (anticipata) VDI 2736 polimeri; vite-ruota ISO/TS 14521
+4a. ✅ VDI 2736-2 (src/gearcalc/rating): temperature θ_Fuß/θ_Fla, piede (Y_Fa/Y_Sa con carico in
+   testa da geometria reale, σ_FG = Y_ST·σ_FlimN), fianco, usura a secco, deformazione.
+   Materiali standard POM/PA66/PBT/acciaio; E(θ) indicativi. Lubrificazioni: secco o grasso
+   (Isoflex Topas L32 trattato come grasso VDI, μ = 0.09). Mancano: coppie interne, carico di
+   picco (σ_S), dati fornitori.
+4b. vite-ruota ISO/TS 14521
 3. adapter ISO 6336 → python-gearbox
 5. ISO 1328-1:2013, report
 6. tool MCP in CATIA_V5_MCP
