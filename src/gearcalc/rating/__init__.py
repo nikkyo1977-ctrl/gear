@@ -10,6 +10,13 @@ from gearcalc.rating.vdi2736 import (
     loss_factor,
     rate_vdi2736,
 )
+from gearcalc.rating.worm_plastic import (
+    WormOperating,
+    WormPlasticInput,
+    WormPlasticResult,
+    efficiency,
+    rate_worm_plastic,
+)
 
 __all__ = [
     "Housing",
@@ -20,7 +27,12 @@ __all__ = [
     "RootFormFactors",
     "VDI2736Input",
     "VDI2736Result",
+    "WormOperating",
+    "WormPlasticInput",
+    "WormPlasticResult",
+    "efficiency",
     "loss_factor",
     "rate_vdi2736",
+    "rate_worm_plastic",
     "root_form_factors",
 ]

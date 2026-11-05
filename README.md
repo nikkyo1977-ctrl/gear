@@ -11,7 +11,7 @@ partire dai punti di profilo prodotti da questa libreria.
 | 1 | Struttura del pacchetto, modello dati pydantic, geometria cilindrica esterna, test, CI | ✅ |
 | 2 | Geometria ISO 21771 completa: dentature interne, profilo generato da creatore (trocoide, sottosquadro), d_Ff / d_Nf, strisciamenti specifici, ripartizione di x, W_k / M_d, gioco | ✅ |
 | 4a | Ruote in polimero VDI 2736-2: temperature, piede, fianco, usura a secco, deformazione | ✅ |
-| 4b | Vite-ruota ISO/TS 14521 – DIN 3996 | ⏳ (prioritaria) |
+| 4b | Vite acciaio / ruota in plastica: geometria ISO/TS 14521–DIN 3975 (ZA/ZN/ZI/ZK), rendimento, forze, autobloccaggio, piede, usura, freccia | ✅ (temperatura: stima) |
 | 3 | Acciaio ISO 6336:2019 tramite [python-gearbox](https://github.com/efirvida/python-gearbox) | ⏳ |
 | 5 | Tolleranze ISO 1328-1:2013, report | ⏳ |
 | 6 | Integrazione in `CATIA_V5_MCP` | ⏳ |

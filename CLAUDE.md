@@ -39,7 +39,11 @@ storia git, commit 538f5fc).
    Materiali standard POM/PA66/PBT/acciaio; E(θ) indicativi. Lubrificazioni: secco o grasso
    (Isoflex Topas L32 trattato come grasso VDI, μ = 0.09). Mancano: coppie interne, carico di
    picco (σ_S), dati fornitori.
-4b. vite-ruota ISO/TS 14521
+4b. ✅ vite-ruota (geometry/worm.py, rating/worm_plastic.py): geometria ZA/ZN/ZI/ZK, ruota
+   virtuale del piano medio per il piede, rendimento/forze esatti, autobloccaggio, usura Archard
+   coerente con VDI 2736. Temperatura = adattamento VDI 2736-2 con P_V e v_g: SOVRASTIMA
+   (es. 240 °C), va sostituita con VDI 2736-3 o tarata su prove; theta_wheel per imporla.
+   Mancano: VDI 2736-3, ruota in bronzo ISO/TS 14521, profilo vite per CATIA.
 3. adapter ISO 6336 → python-gearbox
 5. ISO 1328-1:2013, report
 6. tool MCP in CATIA_V5_MCP

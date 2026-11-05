@@ -18,8 +18,18 @@ from gearcalc.geometry.pair import (
     x_sum_for_center_distance,
 )
 from gearcalc.geometry.profile import gear_profile, tooth_flank, undercut_form_diameter
+from gearcalc.geometry.worm import (
+    FlankForm,
+    WormGearSet,
+    WormGeometry,
+    virtual_wheel,
+    worm_geometry,
+)
 
 __all__ = [
+    "FlankForm",
+    "WormGearSet",
+    "WormGeometry",
     "backlash",
     "balanced_sliding_x1",
     "form_diameter_hob",
@@ -37,7 +47,9 @@ __all__ = [
     "tooth_flank",
     "tooth_measurement",
     "undercut_form_diameter",
+    "virtual_wheel",
     "working_pressure_angle",
+    "worm_geometry",
     "x_min_undercut",
     "x_sum_for_center_distance",
 ]
