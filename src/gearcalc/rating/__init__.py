@@ -1,6 +1,8 @@
 """Verifiche di resistenza."""
 
 from gearcalc.rating.blatt3 import (
+    Blatt3FlankInput,
+    Blatt3FlankResult,
     Blatt3Geometry,
     Blatt3Input,
     Blatt3Limit,
@@ -26,6 +28,8 @@ from gearcalc.rating.worm_plastic import (
 )
 
 __all__ = [
+    "Blatt3FlankInput",
+    "Blatt3FlankResult",
     "Blatt3Geometry",
     "Blatt3Input",
     "Blatt3Limit",

@@ -9,6 +9,93 @@ from gearcalc.errors import GeometryError
 from gearcalc.rating import Blatt3Input, rate_blatt3
 
 
+def flank_case(case):
+    data = annex(case)
+    data["geometry"]["epsilon_n_reference"] = 2.130 if case == "A1" else 2.268
+    data["flank"] = dict(
+        mu=0.1,
+        E_1=210000,
+        nu_1=0.3,
+        E_2=2100 if case == "A1" else 767,
+        nu_2=0.4 if case == "A1" else 0.47,
+    )
+    return data
+
+
+@pytest.mark.parametrize(
+    ("case", "expected"),
+    [
+        ("A1", (520.26, 5.028, 0.685189, 0.0846467, 2.22865, 0.741036, 103.060)),
+        ("A2", (20.50, 1.574, 0.664016, 0.115234, 0.743302, 0.224696, 38.9069)),
+    ],
+)
+def test_flank_annex(case, expected):
+    data = flank_case(case)
+    geometry_result = rate_blatt3(Blatt3Input(**data))
+    data["flank"]["epsilon_source"] = "reference"
+    annex_result = rate_blatt3(Blatt3Input(**data))
+    f = annex_result.flank
+    # Tolleranze assolute per la precisione degli intermedi indipendenti KB/PDF.
+    tolerances = (
+        0.01,
+        0.001,
+        0.000001,
+        0.0000001 if case == "A1" else 0.000001,
+        0.00001 if case == "A1" else 0.000001,
+        0.000001,
+        0.001 if case == "A1" else 0.0001,
+    )
+    for name, value, tol in zip(
+        ("F_n", "rho_n", "Z_epsilonS", "Z_F", "a_h", "b_h", "sigma_Hm"),
+        expected,
+        tolerances,
+        strict=True,
+    ):
+        assert getattr(f, name) == pytest.approx(value, abs=tol, rel=0), name
+    fg = geometry_result.flank
+    assert fg.epsilon_used == geometry_result.epsilon_n and fg.epsilon_source == "geometry"
+    assert f.epsilon_used == data["geometry"]["epsilon_n_reference"]
+    assert f.flank_ok is None
+    assert fg.a_h == f.a_h and fg.b_h == f.b_h
+    assert fg.sigma_Hm / f.sigma_Hm == pytest.approx(math.sqrt(f.epsilon_used / fg.epsilon_used))
+    assert geometry_result.tau_F == annex_result.tau_F
+
+
+@pytest.mark.parametrize(
+    ("field", "diameter"), [("d_form1", 18.080899924), ("d_form2", 53.188327138)]
+)
+def test_a1_equivalent_form_circles(field, diameter):
+    # Inversioni alternative della (12), esempi diagnostici senza attribuzione al pezzo.
+    data = flank_case("A1")
+    data["geometry"][field] = diameter
+    result = rate_blatt3(Blatt3Input(**data))
+    assert result.epsilon_n == pytest.approx(2.130, abs=1e-9)
+    assert result.flank.sigma_Hm == pytest.approx(103.060, abs=0.001)
+
+
+def test_flank_load_scaling_and_limit():
+    data = flank_case("A1")
+    data["flank"]["sigma_HP"] = dict(value=110, source="caso sintetico")
+    nominal = rate_blatt3(Blatt3Input(**data)).flank
+    data["K_A"] = 2
+    loaded = rate_blatt3(Blatt3Input(**data)).flank
+    assert nominal.flank_ok and not loaded.flank_ok
+    assert nominal.F_n == loaded.F_n
+    assert loaded.sigma_Hm / nominal.sigma_Hm == pytest.approx(math.cbrt(2))
+    assert loaded.a_h / nominal.a_h == pytest.approx(math.cbrt(2))
+
+
+def test_flank_requires_declared_reference_and_valid_working_angles():
+    data = flank_case("A1")
+    data["flank"]["epsilon_source"] = "reference"
+    del data["geometry"]["epsilon_n_reference"]
+    with pytest.raises(GeometryError, match="epsilon_n_reference"):
+        rate_blatt3(Blatt3Input(**data))
+    data["geometry"]["beta_s1"] = 5
+    with pytest.raises(GeometryError, match="Angoli incompatibili"):
+        rate_blatt3(Blatt3Input(**data))
+
+
 def annex(case):
     # Dati assegnati dall'esempio. Le resistenze sono letture pubblicate, non curve interpolate.
     if case == "A1":

@@ -1,4 +1,4 @@
-"""VDI 2736 Blatt 3:2014-05, §§3.1–3.2.1. Vite metallica motrice, assi a 90°.
+"""VDI 2736 Blatt 3:2014-05, §§3.1–3.2.2. Vite metallica motrice, assi a 90°.
 
 Geometria effettiva a metà tolleranza, ruota semicristallina. Quote in mm, angoli
 in gradi (moduli), forze in N, tensioni in MPa. Carico costante sulla ruota.
@@ -65,6 +65,18 @@ class Blatt3Limit(_Model):
     source: Source
 
 
+class Blatt3FlankInput(_Model):
+    """Elasticità isotropa alla temperatura di contatto. E in MPa, μ di esercizio."""
+
+    E_1: Positive
+    nu_1: float = Field(gt=-1, le=0.5)
+    E_2: Positive
+    nu_2: float = Field(gt=-1, le=0.5)
+    mu: float = Field(ge=0)
+    epsilon_source: Literal["geometry", "reference"] = "geometry"
+    sigma_HP: Blatt3Limit | None = None
+
+
 class Blatt3Input(_Model):
     geometry: Blatt3Geometry
     wheel_grade: Source = Field(description="Grado della ruota termoplastica semicristallina")
@@ -78,6 +90,30 @@ class Blatt3Input(_Model):
         default=None, description="Alla velocità e lubrificazione date"
     )
     sigma_ZSch: Blatt3Limit | None = Field(default=None, description="A theta_M e N_L della ruota")
+    flank: Blatt3FlankInput | None = None
+
+
+class Blatt3FlankResult(_Model):
+    """Eq. (22)–(34). Angoli in gradi, lunghezze in mm, forza in N, pressione in MPa."""
+
+    epsilon_source: Literal["geometry", "reference"]
+    epsilon_used: float
+    Z_epsilonS: float
+    alpha_sn: float
+    rho_z: float
+    F_n: float
+    rho_n1: float
+    rho_n2: float
+    rho_n: float
+    phi: float
+    theta: float
+    eta: float
+    xi: float
+    Z_F: float
+    a_h: float
+    b_h: float
+    sigma_Hm: float
+    flank_ok: bool | None
 
 
 class Blatt3Result(_Model):
@@ -111,6 +147,7 @@ class Blatt3Result(_Model):
     S_F: float | None
     S_Fmin: float
     root_ok: bool | None
+    flank: Blatt3FlankResult | None = None
     warnings: tuple[str, ...]
 
 
@@ -123,8 +160,74 @@ def _contact_length(tip: float, working: float, base: float, beta_base: float) -
     )
 
 
+def _flank_contact(
+    g: Blatt3Geometry, flank: Blatt3FlankInput, epsilon_n: float, F_t2: float, K_A: float
+) -> Blatt3FlankResult:
+    """Contatto ellittico con vite motrice (§3.2.2); assi perpendicolari."""
+    rad = math.radians
+    beta1 = rad(90 - g.gamma_m1)
+    beta_s1 = rad(g.beta_s1)
+    if beta_s1 == 0:
+        raise GeometryError("Elica di lavoro della vite nulla")
+    cos_alpha_sn = math.sin(beta1) * math.cos(rad(g.alpha_n)) / math.sin(beta_s1)
+    if cos_alpha_sn > 1 + 1e-14:
+        raise GeometryError("Angoli incompatibili con la pressione normale di lavoro")
+    alpha_sn = math.acos(min(1.0, cos_alpha_sn))
+    rho_z = math.atan(flank.mu / math.cos(alpha_sn))
+    beta_s2 = rad(90 - g.beta_s1)
+    if rho_z >= beta_s1:
+        raise GeometryError("Attrito e angoli incompatibili con la vite motrice")
+    F_n = F_t2 * math.cos(rho_z) / (math.cos(alpha_sn) * math.cos(beta_s2 + rho_z))
+
+    rho_n1 = math.sqrt(g.d_s1**2 - g.d_b1**2) / (2 * math.cos(rad(g.beta_b1)))
+    rho_n2 = math.sqrt(g.d_s2**2 - g.d_b2**2) / (2 * math.cos(rad(g.beta_b2)))
+    if min(rho_n1, rho_n2) <= 0:
+        raise GeometryError("Raggio di curvatura nullo al punto di lavoro")
+    rho_n = 1 / (1 / rho_n1 + 1 / rho_n2)
+    sin_alpha = math.sin(rad(g.alpha_n))
+    phi = math.atan(math.tan(beta1) * sin_alpha) + math.atan(math.tan(rad(g.beta_2)) * sin_alpha)
+    # Forma equivalente alla (29), stabile per piccoli angoli: sin(theta) da 1-cos²(theta).
+    sin_theta = 2 * math.sqrt(rho_n1 * rho_n2) * math.sin(phi) / (rho_n1 + rho_n2)
+    theta = math.degrees(math.asin(min(1.0, sin_theta)))
+    if theta <= 0:
+        raise GeometryError("Contatto ellittico degenere")
+    eta = 0.09727 * theta**0.488
+    xi = 39.26 * theta**-0.786
+    Z_F = math.cbrt(1.5 * ((1 - flank.nu_1**2) / flank.E_1 + (1 - flank.nu_2**2) / flank.E_2))
+    length = Z_F * math.cbrt(K_A * F_n * rho_n)
+    a_h, b_h = xi * length, eta * length
+
+    epsilon = epsilon_n
+    if flank.epsilon_source == "reference":
+        if g.epsilon_n_reference is None:
+            raise GeometryError("Richiesto epsilon_n_reference per il fianco con fonte reference")
+        epsilon = g.epsilon_n_reference
+    Z_epsilonS = 1 / math.sqrt(epsilon)
+    sigma_Hm = 1.5 * K_A * F_n * Z_epsilonS / (math.pi * a_h * b_h)
+    return Blatt3FlankResult(
+        epsilon_source=flank.epsilon_source,
+        epsilon_used=epsilon,
+        Z_epsilonS=Z_epsilonS,
+        alpha_sn=math.degrees(alpha_sn),
+        rho_z=math.degrees(rho_z),
+        F_n=F_n,
+        rho_n1=rho_n1,
+        rho_n2=rho_n2,
+        rho_n=rho_n,
+        phi=math.degrees(phi),
+        theta=theta,
+        eta=eta,
+        xi=xi,
+        Z_F=Z_F,
+        a_h=a_h,
+        b_h=b_h,
+        sigma_Hm=sigma_Hm,
+        flank_ok=None if flank.sigma_HP is None else sigma_Hm <= flank.sigma_HP.value,
+    )
+
+
 def rate_blatt3(data: Blatt3Input) -> Blatt3Result:
-    """Preliminare (1)-(7) e taglio (8)-(21), con limiti espliciti e precisione piena."""
+    """Preliminare e taglio, più pressione al fianco se sono forniti i dati di contatto."""
     g = data.geometry
     rad = math.radians
     # Le quote di lavoro degli allegati sono stampate al millesimo di millimetro.
@@ -195,7 +298,13 @@ def rate_blatt3(data: Blatt3Input) -> Blatt3Result:
         S_F = tau_Flim / tau_F
     else:
         warnings.append("Resistenza a temperatura e cicli assegnati mancante: piede indeterminato")
+    flank = None
+    if data.flank is not None:
+        flank = _flank_contact(g, data.flank, epsilon_n, F_t2, data.K_A)
+        if flank.flank_ok is None:
+            warnings.append("Pressione ammissibile mancante: verifica del fianco indeterminata")
     return Blatt3Result(
+        flank=flank,
         inputs=data,
         n_2=n_2,
         N_L=60 * n_2 * data.life_hours,
