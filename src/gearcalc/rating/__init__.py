@@ -1,5 +1,12 @@
 """Verifiche di resistenza."""
 
+from gearcalc.rating.blatt3 import (
+    Blatt3Geometry,
+    Blatt3Input,
+    Blatt3Limit,
+    Blatt3Result,
+    rate_blatt3,
+)
 from gearcalc.rating.materials import Lubrication, Material, Polymer
 from gearcalc.rating.root_form import RootFormFactors, root_form_factors
 from gearcalc.rating.vdi2736 import (
@@ -19,6 +26,10 @@ from gearcalc.rating.worm_plastic import (
 )
 
 __all__ = [
+    "Blatt3Geometry",
+    "Blatt3Input",
+    "Blatt3Limit",
+    "Blatt3Result",
     "Housing",
     "Lubrication",
     "Material",
@@ -32,6 +43,7 @@ __all__ = [
     "WormPlasticResult",
     "efficiency",
     "loss_factor",
+    "rate_blatt3",
     "rate_vdi2736",
     "rate_worm_plastic",
     "root_form_factors",
